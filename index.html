@@ -3,62 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Rotation in JavaScript</title>
+    <title>Statistical Data Analysis Tool</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: black;
-            margin: 0;
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            text-align: center;
+            color: white;
         }
-        .scene {
-            perspective: 800px;
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
         }
-        .cube {
-            width: 100px;
+        #dataInput {
+            width: 80%;
             height: 100px;
-            position: relative;
-            transform-style: preserve-3d;
-            transform: rotateX(0deg) rotateY(0deg);
-            animation: rotateCube 3s linear infinite;
+            margin-bottom: 10px;
+            background: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
         }
-        .face {
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            background: rgba(0, 255, 255, 0.8);
-            border: 1px solid white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 20px;
-            color: black;
+        button {
+            background: linear-gradient(135deg, #ff8c00, #ff4500);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: 0.3s ease-in-out;
         }
-        .front  { transform: translateZ(50px); }
-        .back   { transform: rotateY(180deg) translateZ(50px); }
-        .right  { transform: rotateY(90deg) translateZ(50px); }
-        .left   { transform: rotateY(-90deg) translateZ(50px); }
-        .top    { transform: rotateX(90deg) translateZ(50px); }
-        .bottom { transform: rotateX(-90deg) translateZ(50px); }
-
-        @keyframes rotateCube {
-            from { transform: rotateX(0deg) rotateY(0deg); }
-            to { transform: rotateX(360deg) rotateY(360deg); }
+        button:hover {
+            background: linear-gradient(135deg, #ff4500, #ff0000);
+            transform: scale(1.05);
+        }
+        .canvas-container {
+            width: 600px;
+            height: 400px;
+            margin: auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="scene">
-        <div class="cube">
-            <div class="face front">Front</div>
-            <div class="face back">Back</div>
-            <div class="face right">Right</div>
-            <div class="face left">Left</div>
-            <div class="face top">Top</div>
-            <div class="face bottom">Bottom</div>
+    <div class="container">
+        <h1>Statistical Data Analysis Tool</h1>
+        <label for="dataInput">Enter Data (comma-separated, two lines for covariance & scatter plot):</label><br>
+        <textarea id="dataInput"></textarea><br>
+        <button onclick="analyzeData()">Analyze Data</button>
+        
+        <div id="results">
+            <h2>Results</h2>
+            <p>Mean: <span id="mean"></span></p>
+            <p>Median: <span id="median"></span></p>
+            <p>Mode: <span id="mode"></span></p>
+            <p>Min: <span id="min"></span> | Max: <span id="max"></span> | Range: <span id="range"></span></p>
+            <p>Standard Deviation: <span id="stdDev"></span></p>
+            <p>Variance: <span id="variance"></span></p>
+            <p>Covariance: <span id="covariance"></span></p>
+            <p>Pearson Correlation: <span id="correlation"></span></p>
+        </div>
+        
+        <h2>Visualizations</h2>
+        <div class="canvas-container">
+            <canvas id="histogramChart"></canvas>
+        </div>
+        <div class="canvas-container">
+            <canvas id="scatterPlotChart"></canvas>
         </div>
     </div>
+    
+    <script>
+        function analyzeData() {
+            let inputData = document.getElementById("dataInput").value.trim();
+            let lines = inputData.split("\n").map(line => line.split(",").map(Number));
+            
+            if (lines.length < 1 || lines[0].some(isNaN)) {
+                alert("Invalid data. Please enter comma-separated numbers.");
+                return;
+            }
+
+            let data = lines[0];
+            let data2 = lines.length > 1 && lines[1].length === data.length ? lines[1] : [];
+
+            document.getElementById("mean").textContent = calculateMean(data).toFixed(2);
+            document.getElementById("median").textContent = calculateMedian(data).toFixed(2);
+            document.getElementById("mode").textContent = calculateMode(data).join(", ");
+            document.getElementById("min").textContent = Math.min(...data);
+            document.getElementById("max").textContent = Math.max(...data);
+            document.getElementById("range").textContent = (Math.max(...data) - Math.min(...data)).toFixed(2);
+            document.getElementById("stdDev").textContent = calculateStandardDeviation(data).toFixed(2);
+            document.getElementById("variance").textContent = calculateVariance(data).toFixed(2);
+            document.getElementById("covariance").textContent = data2.length ? calculateCovariance(data, data2).toFixed(2) : "N/A";
+            document.getElementById("correlation").textContent = data2.length ? calculatePearsonCorrelation(data, data2).toFixed(2) : "N/A";
+
+            createHistogram(data, "histogramChart");
+            if (data2.length) createScatterPlot(data, data2, "scatterPlotChart");
+        }
+
+        function calculateMean(data) { return data.reduce((sum, val) => sum + val, 0) / data.length; }
+        function calculateMedian(data) {
+            let sorted = [...data].sort((a, b) => a - b);
+            let mid = Math.floor(sorted.length / 2);
+            return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+        }
+        function calculateMode(data) {
+            let freq = {};
+            data.forEach(num => freq[num] = (freq[num] || 0) + 1);
+            let maxFreq = Math.max(...Object.values(freq));
+            return Object.keys(freq).filter(num => freq[num] === maxFreq).map(Number);
+        }
+        function calculateStandardDeviation(data) {
+            let mean = calculateMean(data);
+            return Math.sqrt(data.reduce((sum, val) => sum + (val - mean) ** 2, 0) / data.length);
+        }
+        function calculateVariance(data) { return calculateStandardDeviation(data) ** 2; }
+        function calculateCovariance(x, y) {
+            let meanX = calculateMean(x), meanY = calculateMean(y);
+            return x.reduce((sum, xi, i) => sum + (xi - meanX) * (y[i] - meanY), 0) / x.length;
+        }
+        function calculatePearsonCorrelation(x, y) {
+            let cov = calculateCovariance(x, y);
+            return cov / (calculateStandardDeviation(x) * calculateStandardDeviation(y));
+        }
+
+        function createHistogram(data, canvasId) {
+            let ctx = document.getElementById(canvasId).getContext("2d");
+            if (window.myHistogram) window.myHistogram.destroy();
+            let colors = data.map(() => `hsl(${Math.random() * 360}, 70%, 60%)`);
+            window.myHistogram = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: [...new Set(data)].sort((a, b) => a - b),
+                    datasets: [{
+                        label: "Histogram",
+                        data: Object.values(data.reduce((freq, num) => (freq[num] = (freq[num] || 0) + 1, freq), {})),
+                        backgroundColor: colors,
+                        borderColor: "#ffffff",
+                        borderWidth: 1
+                    }]
+                },
+                options: { responsive: true, scales: { y: { beginAtZero: true } } }
+            });
+        }
+
+        function createScatterPlot(x, y, canvasId) {
+            let ctx = document.getElementById(canvasId).getContext('2d');
+            if (window.myScatterPlot) window.myScatterPlot.destroy();
+            window.myScatterPlot = new Chart(ctx, {
+                type: 'scatter',
+                data: { datasets: [{ label: 'Scatter Plot', data: x.map((xi, i) => ({ x: xi, y: y[i] })), backgroundColor: 'blue' }] },
+                options: { scales: { x: { beginAtZero: false }, y: { beginAtZero: false } } }
+            });
+        }
+    </script>
 </body>
 </html>
