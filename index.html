@@ -56,19 +56,24 @@
         h2 {
             color: #ffea00; /* Bright yellow */
         }
+        .histogram-title, .scatter-title {
+            color: #ff5733; /* Bright orange-red */
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 style="color: #ffea00;">Statistical Data Analysis Tool</h1>
+        <h1>Statistical Data Analysis Tool</h1>
         <label for="dataInput">Enter Data (comma-separated, two lines for covariance & scatter plot):</label><br>
         <textarea id="dataInput"></textarea><br>
         <button onclick="analyzeData()">Analyze Data</button>
         
-        <h2>Visualizations</h2>
+        <h2 class="histogram-title">Histogram</h2>
         <div class="canvas-container">
             <canvas id="histogramChart"></canvas>
         </div>
+        
+        <h2 class="scatter-title">Scatter Plot</h2>
         <div class="canvas-container">
             <canvas id="scatterPlotChart"></canvas>
         </div>
@@ -76,7 +81,7 @@
     
     <script>
         function analyzeData() {
-            alert("Analyze Data function executed!"); // Placeholder function to prevent errors
+            alert("Function analyzeData is not yet implemented.");
         }
 
         function createHistogram(data, canvasId) {
@@ -128,3 +133,4 @@
     </script>
 </body>
 </html>
+
