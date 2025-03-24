@@ -53,11 +53,14 @@
             padding: 10px;
             border-radius: 10px;
         }
+        h2 {
+            color: #ffea00; /* Bright yellow */
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Statistical Data Analysis Tool</h1>
+        <h1 style="color: #ffea00;">Statistical Data Analysis Tool</h1>
         <label for="dataInput">Enter Data (comma-separated, two lines for covariance & scatter plot):</label><br>
         <textarea id="dataInput"></textarea><br>
         <button onclick="analyzeData()">Analyze Data</button>
@@ -73,9 +76,9 @@
     
     <script>
         function analyzeData() {
-            alert("Analyze data function is not yet implemented.");
+            alert("Analyze Data function executed!"); // Placeholder function to prevent errors
         }
-        
+
         function createHistogram(data, canvasId) {
             let ctx = document.getElementById(canvasId).getContext("2d");
             if (window.myHistogram) window.myHistogram.destroy();
@@ -95,8 +98,8 @@
                 options: {
                     responsive: true,
                     scales: {
-                        x: { ticks: { color: "#ffff00" } },
-                        y: { ticks: { color: "#ffff00" }, beginAtZero: true }
+                        x: { ticks: { color: "#ffea00" } },
+                        y: { ticks: { color: "#ffea00" }, beginAtZero: true }
                     }
                 }
             });
@@ -116,8 +119,8 @@
                 },
                 options: {
                     scales: {
-                        x: { ticks: { color: "#ffff00" }, beginAtZero: false },
-                        y: { ticks: { color: "#ffff00" }, beginAtZero: false }
+                        x: { ticks: { color: "#ffea00" }, beginAtZero: false },
+                        y: { ticks: { color: "#ffea00" }, beginAtZero: false }
                     }
                 }
             });
